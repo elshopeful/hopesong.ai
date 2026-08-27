@@ -1,6 +1,15 @@
-import React, {useState} 
+import React, {useEffect, useState } 
 from "react";
 import "./App.css";
+import 
+{ initializeWebMCPPolyfill } 
+from "@mcp-b/webmcp-polyfill";
+initializeWebMCPPolyfill();
+
+import { registerHopeSongTools } from 
+"./webmcp";
+
+registerHopeSongTools();
 
 const songs = [
   {
@@ -101,6 +110,9 @@ const songs = [
 ];
 
 function App() {
+  useEffect(() => {
+  registerHopeSongTools();
+}, []);
   const [playingSong, 
   setPlayingSong] = useState(null);
   return (
@@ -156,17 +168,49 @@ function App() {
           </div>
 
           <div className="quick-actions">
-            <button>
-              🎵 &nbsp; Create a Song
-            </button>
+<button onClick={() => alert("Create a Song clicked!")}>
+  🎵 &nbsp; Create a Song
+</button>
+            <button
+  onClick={() => {
+    const prayer = prompt("What would you like to pray about?");
+    if (prayer) {
+      alert("Your prayer has been received. 🙏");
+    }
+  }}
+>
+  🙏 &nbsp; Write a Prayer
+</button>
+<button
+  onClick={() => {
+    const language = prompt(
+      "Choose your language by entering a number from 1–5:\n\n" +
+      "1. 🇮🇩 Bahasa Indonesia\n" +
+      "2. 🇬🇧 English\n" +
+      "3. 🇨🇳 中文\n" +
+      "4. 🇰🇷 한국어\n" +
+      "5. 🇪🇸 Español\n\n" +
+      "Enter your choice:"
+    );
 
-            <button>
-              🙏 &nbsp; Write a Prayer
-            </button>
+    const verses = {
+      "1": "Mazmur 46:1 — Allah itu bagi kita tempat perlindungan dan kekuatan, sebagai penolong dalam kesesakan sangat terbukti. 🙏",
+      "2": "Psalm 46:1 — God is our refuge and strength, an ever-present help in trouble. 🙏",
+      "3": "诗篇 46:1 — 神是我们的避难所，是我们的力量，是我们在患难中随时的帮助。🙏",
+      "4": "시편 46:1 — 하나님은 우리의 피난처시요 힘이시니 환난 중에 만날 큰 도움이시라. 🙏",
+      "5": "Salmo 46:1 — Dios es nuestro refugio y nuestra fuerza, nuestra ayuda siempre presente en las dificultades. 🙏"
+    };
 
-            <button>
-              📖 &nbsp; Find a Verse
-            </button>
+    if (verses[language]) {
+      alert(verses[language]);
+    } else {
+      alert("Please enter a number from 1 to 5.");
+    }
+  }}
+>
+  📖 &nbsp; Find a Verse
+</button>
+
           </div>
         </section>
 
