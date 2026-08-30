@@ -147,7 +147,7 @@ showWebMCPStatus(
             ],
 
             description:
-              "The language in which the Bible verse should be returned."
+               "The language in which the Bible verse should be returned. Use exactly one of these values: Bahasa Indonesia, English, 中文, 한국어, or Español. Do not use language codes such as id, en, zh, ko, or es."
           }
         },
 
