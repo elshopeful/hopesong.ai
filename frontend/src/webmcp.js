@@ -482,7 +482,7 @@ showWebMCPStatus(
       status.id = "webmcp-status";
 
       status.textContent =
-        "✓ WebMCP aktif — findBibleVerse tersedia";
+        "✓ WebMCP aktif — findBibleVerse + findHopeJourney";
 
       status.style.cssText = `
         position: fixed;
