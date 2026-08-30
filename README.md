@@ -16,15 +16,18 @@ HopeSong.ai is built around a simple journey:
 
 ## What HopeSong.ai Does
 
-HopeSong.ai helps people and AI agents discover Christian encouragement through experiences such as:
+HopeSong.ai helps people and AI agents discover Christian encouragement based on what someone is experiencing in the moment.
 
-- Bible verses
-- Prayer
-- Reflection
-- Worship songs
-- Hopeful devotional journeys
+The current WebMCP implementation provides two working capabilities:
 
-The current WebMCP implementation introduces the first working capability of this journey: finding a relevant Bible verse based on a user's emotional or spiritual need.
+- Find a relevant Bible verse
+- Create a short personalized Hope Journey
+
+A Hope Journey combines:
+
+**Scripture → Reflection → Prayer → Next Step → Hope**
+
+This allows an AI agent to move beyond simply finding information and help guide a person through a meaningful moment of encouragement.
 
 ---
 
@@ -34,29 +37,29 @@ Traditional websites require users to navigate pages, search menus, and understa
 
 With WebMCP, HopeSong.ai can expose meaningful capabilities directly to AI agents.
 
-Instead of an agent guessing how to interact with the website, it can discover a structured HopeSong.ai tool, understand its inputs, and use it on behalf of the user.
+Instead of an agent guessing how to interact with the website, it can discover structured HopeSong.ai tools, understand their inputs, and use them on behalf of the user.
 
 This creates a more natural experience:
 
-**The user expresses what they are feeling → the AI agent understands the need → HopeSong.ai provides a relevant resource.**
+**The user expresses what they are feeling → the AI agent understands the need → HopeSong.ai provides a relevant journey toward encouragement.**
 
 ---
 
 ## WebMCP Implementation
 
-HopeSong.ai currently exposes the following WebMCP tool:
+HopeSong.ai currently exposes two WebMCP tools through `document.modelContext.registerTool()`.
 
-### `findBibleVerse`
+### 1. `findBibleVerse`
 
 **Title:** Find a Bible Verse
 
-The tool finds a relevant Bible verse based on the user's topic, emotion, or spiritual need and returns it in the requested language.
+Finds a relevant Bible verse based on the user's topic, emotion, or spiritual need and returns it in the requested language.
 
-### Inputs
+#### Inputs
 
-#### `topic`
+**`topic`**
 
-A topic, emotion, or spiritual need such as:
+Examples include:
 
 - fear
 - anxiety
@@ -68,7 +71,7 @@ A topic, emotion, or spiritual need such as:
 
 The tool also recognizes several equivalent terms in supported languages.
 
-#### `language`
+**`language`**
 
 Supported values:
 
@@ -82,24 +85,87 @@ The language value should use one of these exact names rather than language code
 
 ---
 
+### 2. `findHopeJourney`
+
+**Title:** Find a Hope Journey
+
+Creates a short HopeSong.ai journey based on the user's emotional or spiritual need.
+
+The journey contains:
+
+1. Scripture
+2. Reflection
+3. Prayer
+4. A simple next step
+5. A message of hope
+
+#### Inputs
+
+**`topic`**
+
+Examples include:
+
+- fear
+- anxiety
+- stress
+- uncertainty
+- tiredness
+- peace
+- hope
+- encouragement
+
+**`language`**
+
+Currently supported values:
+
+- `Bahasa Indonesia`
+- `English`
+
+Both WebMCP tools are read-only and do not modify the website.
+
+---
+
 ## Example Journey
 
 A user might say:
 
-> I'm feeling afraid and uncertain about what comes next. Find me a Bible verse in Bahasa Indonesia.
+> I'm feeling afraid and uncertain about my future.
 
-An AI agent can discover HopeSong.ai's `findBibleVerse` WebMCP tool and call it with:
+An AI agent can discover HopeSong.ai's `findHopeJourney` WebMCP tool and call it with:
 
 ```json
 {
-  "topic": "fear",
-  "language": "Bahasa Indonesia"
+  "topic": "I am afraid and uncertain about my future",
+  "language": "English"
 }
 ```
 
-HopeSong.ai then returns a relevant Bible verse such as **Yesaya 41:10** in Bahasa Indonesia.
+HopeSong.ai can then return a structured journey:
 
-Another user might ask for peace in English:
+```text
+HOPE JOURNEY — FEAR
+
+SCRIPTURE
+Isaiah 41:10
+
+REFLECTION
+A short reflection for the user's current situation.
+
+PRAYER
+A short prayer related to the user's need.
+
+NEXT STEP
+One simple action the person can take.
+
+HOPE
+A final message of encouragement.
+```
+
+Instead of requiring the user to search through different sections of a website, an AI agent can discover and use HopeSong.ai's structured capability directly.
+
+The simpler `findBibleVerse` tool can also be used when only Scripture is needed.
+
+For example:
 
 ```json
 {
@@ -108,20 +174,7 @@ Another user might ask for peace in English:
 }
 ```
 
-HopeSong.ai can return a relevant verse such as **John 14:27**.
-
-A user looking for hope might use:
-
-```json
-{
-  "topic": "hope",
-  "language": "Bahasa Indonesia"
-}
-```
-
-HopeSong.ai can return a relevant verse such as **Roma 15:13**.
-
-These examples demonstrate the core idea behind HopeSong.ai: transforming a human emotional or spiritual need into a structured, agent-accessible journey toward encouragement.
+HopeSong.ai can return a relevant Bible verse such as **John 14:27**.
 
 ---
 
@@ -161,21 +214,26 @@ Run:
 await document.modelContext.getTools()
 ```
 
-The registered HopeSong.ai WebMCP tool should include:
+Two registered tools should be returned:
 
 ```text
 findBibleVerse
+findHopeJourney
 ```
 
-### 3. Execute the Tool
+### 3. Test `findBibleVerse`
 
 Run:
 
 ```javascript
-const [tool] = await document.modelContext.getTools();
+const tools = await document.modelContext.getTools();
+
+const bibleTool = tools.find(
+  tool => tool.name === "findBibleVerse"
+);
 
 const result = await document.modelContext.executeTool(
-  tool,
+  bibleTool,
   JSON.stringify({
     topic: "fear",
     language: "Bahasa Indonesia"
@@ -187,17 +245,21 @@ console.log(result);
 
 The tool should return a relevant Bible verse for fear in Bahasa Indonesia.
 
-### Additional Test: Peace
+### 4. Test `findHopeJourney`
 
-Try:
+Run:
 
 ```javascript
-const [tool] = await document.modelContext.getTools();
+const tools = await document.modelContext.getTools();
+
+const journeyTool = tools.find(
+  tool => tool.name === "findHopeJourney"
+);
 
 const result = await document.modelContext.executeTool(
-  tool,
+  journeyTool,
   JSON.stringify({
-    topic: "peace",
+    topic: "I am afraid and uncertain about my future",
     language: "English"
   })
 );
@@ -205,19 +267,33 @@ const result = await document.modelContext.executeTool(
 console.log(result);
 ```
 
-The tool should return a relevant Bible verse about peace in English.
+The result should contain:
 
-### Additional Test: Hope
+```text
+HOPE JOURNEY — FEAR
 
-Try:
+SCRIPTURE
+REFLECTION
+PRAYER
+NEXT STEP
+HOPE
+```
+
+### 5. Test the Hope Journey in Bahasa Indonesia
+
+Run:
 
 ```javascript
-const [tool] = await document.modelContext.getTools();
+const tools = await document.modelContext.getTools();
+
+const journeyTool = tools.find(
+  tool => tool.name === "findHopeJourney"
+);
 
 const result = await document.modelContext.executeTool(
-  tool,
+  journeyTool,
   JSON.stringify({
-    topic: "hope",
+    topic: "Aku merasa lelah, cemas, dan tidak tahu harus bagaimana",
     language: "Bahasa Indonesia"
   })
 );
@@ -225,7 +301,7 @@ const result = await document.modelContext.executeTool(
 console.log(result);
 ```
 
-The tool should return a relevant Bible verse about hope in Bahasa Indonesia.
+The tool should return a Bahasa Indonesia Hope Journey based on the user's expressed need.
 
 ---
 
@@ -256,6 +332,8 @@ npm run dev -- --host 0.0.0.0
 ```
 
 Vite will provide the local development URL.
+
+> Note: the application can run locally, but WebMCP availability depends on the browser environment and origin configuration. The production deployment is the recommended environment for testing the registered WebMCP tools.
 
 ---
 
@@ -304,7 +382,7 @@ HopeSong.ai currently uses:
 
 HopeSong.ai explores how people and AI agents can work together to discover meaningful spiritual resources based on what someone is experiencing in the moment.
 
-The long-term vision is to create a connected journey where an AI agent can help someone move from a moment of fear, weariness, or uncertainty toward:
+The broader vision is to create a connected journey where an AI agent can help someone move from a moment of fear, weariness, or uncertainty toward:
 
 **Scripture → Prayer → Reflection → Worship → Hope**
 
@@ -318,7 +396,7 @@ The goal is not simply to help AI navigate a website.
 
 ## Journey to Hope
 
-HopeSong.ai is designed around a broader journey:
+HopeSong.ai is designed around a broader emotional journey:
 
 ### Fear
 
@@ -328,17 +406,17 @@ A person may arrive feeling afraid, anxious, overwhelmed, or uncertain.
 
 ### Peace
 
-Scripture, prayer, and reflection can help guide the person toward rest and peace.
+Scripture, prayer, reflection, and a simple next step can help guide the person toward rest and peace.
 
 ↓
 
 ### Hope
 
-HopeSong.ai aims to connect that moment with encouragement, worship, and a renewed sense of hope.
+The journey ends with encouragement and a renewed sense of hope.
 
 **Fear → Peace → Hope**
 
-This is the foundation for the future HopeSong.ai agent experience.
+WebMCP enables an AI agent to connect a user's expressed need directly with these HopeSong.ai capabilities.
 
 ---
 
@@ -346,7 +424,7 @@ This is the foundation for the future HopeSong.ai agent experience.
 
 HopeSong.ai was developed for the **WebMCP Challenge 2026**.
 
-The WebMCP implementation, including the `findBibleVerse` tool and its production integration, was developed during the challenge period.
+The WebMCP implementation, including the `findBibleVerse` and `findHopeJourney` tools and their production integration, was developed during the challenge period.
 
 The project demonstrates how a website can expose meaningful structured capabilities to AI agents through WebMCP instead of relying only on traditional human navigation.
 
@@ -354,16 +432,19 @@ The project demonstrates how a website can expose meaningful structured capabili
 
 ## Future Direction
 
-The current submission focuses on a working `findBibleVerse` WebMCP capability.
+The current submission focuses on two working WebMCP capabilities:
 
-Future HopeSong.ai capabilities may expand the journey with tools for:
+- `findBibleVerse`
+- `findHopeJourney`
 
-- Prayer
-- Reflection
+Future HopeSong.ai capabilities may expand the experience with:
+
 - Worship song discovery
-- Personalized devotional journeys
+- Additional languages
+- More emotional and spiritual journey categories
+- Deeper personalized devotional journeys
 
-The vision is for these capabilities to work together so an AI agent can guide a user through a meaningful journey from an expressed emotional need toward hope.
+The long-term vision is for these capabilities to work together so an AI agent can guide a user from an expressed emotional or spiritual need toward meaningful encouragement.
 
 **Fear → Peace → Hope**
 
