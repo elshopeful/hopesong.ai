@@ -590,21 +590,29 @@ function App() {
 
             </div>
 
-            <div className="webmcp-tool">
+           <div className="webmcp-tool">
 
-              <span>
-                AVAILABLE TOOL
-              </span>
+  <span>
+    AVAILABLE WEBMCP TOOLS
+  </span>
 
-              <code>
-                findBibleVerse
-              </code>
+  <code>
+    findBibleVerse
+  </code>
 
-              <small>
-                topic + language
-              </small>
+  <small>
+    Bible verse • topic + language
+  </small>
 
-            </div>
+  <code>
+    findHopeJourney
+  </code>
+
+  <small>
+    Scripture • Reflection • Prayer • Next Step • Hope
+  </small>
+
+</div>
 
           </div>
 
