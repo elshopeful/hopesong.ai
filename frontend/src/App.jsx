@@ -1,354 +1,637 @@
-import React, {useEffect, useState } 
-from "react";
+import { useEffect, useMemo, useState } from "react";
+import { registerHopeSongTools } from "./webmcp";
 import "./App.css";
-import 
-{ initializeWebMCPPolyfill } 
-from "@mcp-b/webmcp-polyfill";
-initializeWebMCPPolyfill();
 
-import { registerHopeSongTools } from 
-"./webmcp";
-
-registerHopeSongTools();
+// ============================================================
+// HOPE SONG DATA
+// ============================================================
 
 const songs = [
   {
-    icon: "🎵",
-    title: "Come To Me, My Child (El's Hopeful)",
-    artist: "El's Hopeful",
-  },
-  {
-    icon: "🙏",
-    title: "O, Heal My Heart With Your Love",
-    artist: "El's Hopeful",
-  },
-  {
-    icon: "🌙",
-    title: "My Perfect Rest in You",
-    artist: "El's Hopeful",
-  },
-  {
-    icon: "🌱",
-    title: "You Formed Me",
-    artist: "El's Hopeful",
-  },
-  {
-    icon: "✨",
-    title: "Nyatakanlah Lagi, Mukjizat-Mu",
-    artist: "El's Hopeful",
-  },
-  {
-    icon: "🕊️",
-    title: "Rancangan-Mu Terjadi Bagiku",
-    artist: "El's Hopeful",
-  },
-  {
-    icon: "🌿",
-    title: "Kau B'ri Kehidupan Baru",
-    artist: "El's Hopeful",
-  },
-  {
-    icon: "🙏",
-    title: "Bapa, Ku Mau Bert'rima Kasih",
-    artist: "El's Hopeful",
-  },
-  {
-    icon: "👣",
-    title: "Every Day I'll Follow You",
-    artist: "El's Hopeful",
-  },
-  {
-    icon: "🌳",
-    title: "Abide in The Tree of Life",
-    artist: "El's Hopeful",
-  },
-  {
-    icon: "🎶",
-    title: "Pujian Syukur",
-    artist: "Doa Malam Pujian Syukur",
-  },
-  {
-    icon: "👑",
-    title: "Menghadap Tahta-Mu",
-    artist: "Doa Malam Pujian Syukur",
-  },
-  {
-    icon: "🕊️",
-    title: "Rohku, Rindu Hadirat-Mu",
-    artist: "Doa Malam Pujian Syukur",
-  },
-  {
-    icon: "🔥",
-    title: "Bimbing Aku, Roh Kudus",
-    artist: "Doa Malam Pujian Syukur",
-  },
-  {
-    icon: "🧭",
-    title: "Arahkanlah, Hatiku",
-    artist: "Doa Malam Pujian Syukur",
-  },
-  {
-    icon: "🛡️",
-    title: "Jika Allah Besertaku",
-    artist: "Doa Malam Pujian Syukur",
-  },
-  {
-    icon: "💛",
-    title: "Percayalah Kembali, Hai Jiwaku",
-    artist: "Doa Malam Pujian Syukur",
-  },
-  {
-    icon: "🙌",
-    title: "Haleluya, Kemenangan Kau Berikan",
-    artist: "Doa Malam Pujian Syukur",
-  },
-  {
-    icon: "❤️",
+    id: 1,
     title: "You Are The One, My God",
     artist: "Doa Malam Pujian Syukur",
+    category: "Hope",
+    description:
+      "Lagu penyembahan tentang Tuhan sebagai sumber pengharapan dan kekuatan.",
+  },
+  {
+    id: 2,
+    title: "Amazing Grace",
+    artist: "Traditional",
+    category: "Grace",
+    description:
+      "Lagu rohani klasik tentang kasih karunia dan keselamatan.",
+  },
+  {
+    id: 3,
+    title: "What A Beautiful Name",
+    artist: "Worship",
+    category: "Worship",
+    description:
+      "Pujian yang mengagungkan nama Tuhan dan karya-Nya.",
+  },
+  {
+    id: 4,
+    title: "Oceans",
+    artist: "Worship",
+    category: "Faith",
+    description:
+      "Lagu tentang mempercayai Tuhan ketika menghadapi ketidakpastian.",
+  },
+  {
+    id: 5,
+    title: "Way Maker",
+    artist: "Worship",
+    category: "Hope",
+    description:
+      "Pengingat bahwa Tuhan tetap bekerja bahkan ketika kita belum melihat jawabannya.",
+  },
+  {
+    id: 6,
+    title: "10,000 Reasons",
+    artist: "Worship",
+    category: "Praise",
+    description:
+      "Lagu pujian untuk mengingat berbagai alasan untuk memuji Tuhan.",
+  },
+
+];
+
+// ============================================================
+// BIBLE VERSES FOR THE MAIN WEBSITE
+// ============================================================
+
+const bibleVerses = [
+  {
+    reference: "Roma 15:13",
+    text: "Semoga Allah, sumber pengharapan, memenuhi kamu dengan segala sukacita dan damai sejahtera dalam iman, supaya kamu berlimpah-limpah dalam pengharapan oleh kuasa Roh Kudus.",
+    category: "Hope",
+  },
+  {
+    reference: "Yesaya 41:10",
+    text: "Janganlah takut, sebab Aku menyertai engkau; janganlah bimbang, sebab Aku ini Allahmu. Aku akan meneguhkan, bahkan akan menolong engkau.",
+    category: "Fear",
+  },
+  {
+    reference: "Yohanes 14:27",
+    text: "Damai sejahtera Kutinggalkan bagimu. Damai sejahtera-Ku Kuberikan kepadamu. Janganlah gelisah dan gentar hatimu.",
+    category: "Peace",
   },
 ];
 
+// ============================================================
+// HELPER
+// ============================================================
+
+function getCategoryIcon(category) {
+  switch (category) {
+    case "Hope":
+      return "♡";
+    case "Grace":
+      return "✦";
+    case "Worship":
+      return "♩";
+    case "Faith":
+      return "◌";
+    case "Praise":
+      return "✧";
+    default:
+      return "♪";
+  }
+}
+
+// ============================================================
+// APP
+// ============================================================
+
 function App() {
+  const [playingSong, setPlayingSong] = useState(null);
+  const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [prayer, setPrayer] = useState("");
+  const [prayerSubmitted, setPrayerSubmitted] = useState(false);
+
+  // ----------------------------------------------------------
+  // REGISTER WEBMCP
+  // ----------------------------------------------------------
+
   useEffect(() => {
-  registerHopeSongTools();
-}, []);
-  const [playingSong, 
-  setPlayingSong] = useState(null);
+    registerHopeSongTools();
+  }, []);
+
+  // ----------------------------------------------------------
+  // SONG CATEGORIES
+  // ----------------------------------------------------------
+
+  const categories = useMemo(() => {
+    return [
+      "All",
+      ...new Set(songs.map((song) => song.category)),
+    ];
+  }, []);
+
+  // ----------------------------------------------------------
+  // FILTER SONGS
+  // ----------------------------------------------------------
+
+  const filteredSongs = useMemo(() => {
+    const query = search.trim().toLowerCase();
+
+    return songs.filter((song) => {
+      const matchesSearch =
+        !query ||
+        song.title.toLowerCase().includes(query) ||
+        song.artist.toLowerCase().includes(query) ||
+        song.category.toLowerCase().includes(query);
+
+      const matchesCategory =
+        selectedCategory === "All" ||
+        song.category === selectedCategory;
+
+      return matchesSearch && matchesCategory;
+    });
+  }, [search, selectedCategory]);
+
+  // ----------------------------------------------------------
+  // PRAYER SUBMIT
+  // ----------------------------------------------------------
+
+  function handlePrayerSubmit(event) {
+    event.preventDefault();
+
+    if (!prayer.trim()) {
+      return;
+    }
+
+    setPrayerSubmitted(true);
+  }
+
+  // ----------------------------------------------------------
+  // MAIN UI
+  // ----------------------------------------------------------
+
   return (
     <div className="app">
 
-      {/* NAVIGATION */}
+      {/* ======================================================
+          NAVIGATION
+      ====================================================== */}
+
       <header className="navbar">
         <div className="logo">
           <span className="heart">♡</span>
           <span>HopeSong.ai</span>
         </div>
 
-        <nav>
+        <nav className="nav-links">
           <a href="#home">Home</a>
           <a href="#songs">Songs</a>
           <a href="#prayer">Prayer</a>
           <a href="#bible">Bible</a>
         </nav>
 
-        <button className="sign-in">Sign In</button>
+        <button
+          className="sign-in"
+          type="button"
+          onClick={() => {
+            alert("Fitur Sign In akan segera tersedia.");
+          }}
+        >
+          Sign In
+        </button>
       </header>
 
+      {/* ======================================================
+          HERO
+      ====================================================== */}
 
-      {/* HERO */}
-      <main id="home">
+      <main>
 
-        <section className="hero">
-          <div className="hero-label">
-            MUSIC • PRAYER • HOPE
-          </div>
+        <section id="home" className="hero">
+          <div className="hero-content">
 
-          <h1>
-            Let your heart
-            <br />
-            sing with hope.
-          </h1>
-
-          <p>
-            Create songs, prayers, and moments of worship that lead
-            <br className="desktop" />
-            your heart closer to God's love.
-          </p>
-
-          <div className="search-box">
-            <span className="search-icon">⌕</span>
-
-            <input
-              type="text"
-              placeholder="What is on your heart today?"
-            />
-
-            <button>Explore</button>
-          </div>
-
-          <div className="quick-actions">
-<button onClick={() => alert("Create a Song clicked!")}>
-  🎵 &nbsp; Create a Song
-</button>
-            <button
-  onClick={() => {
-    const prayer = prompt("What would you like to pray about?");
-    if (prayer) {
-      alert("Your prayer has been received. 🙏");
-    }
-  }}
->
-  🙏 &nbsp; Write a Prayer
-</button>
-<button
-  onClick={() => {
-    const language = prompt(
-      "Choose your language by entering a number from 1–5:\n\n" +
-      "1. 🇮🇩 Bahasa Indonesia\n" +
-      "2. 🇬🇧 English\n" +
-      "3. 🇨🇳 中文\n" +
-      "4. 🇰🇷 한국어\n" +
-      "5. 🇪🇸 Español\n\n" +
-      "Enter your choice:"
-    );
-
-    const verses = {
-      "1": "Mazmur 46:1 — Allah itu bagi kita tempat perlindungan dan kekuatan, sebagai penolong dalam kesesakan sangat terbukti. 🙏",
-      "2": "Psalm 46:1 — God is our refuge and strength, an ever-present help in trouble. 🙏",
-      "3": "诗篇 46:1 — 神是我们的避难所，是我们的力量，是我们在患难中随时的帮助。🙏",
-      "4": "시편 46:1 — 하나님은 우리의 피난처시요 힘이시니 환난 중에 만날 큰 도움이시라. 🙏",
-      "5": "Salmo 46:1 — Dios es nuestro refugio y nuestra fuerza, nuestra ayuda siempre presente en las dificultades. 🙏"
-    };
-
-    if (verses[language]) {
-      alert(verses[language]);
-    } else {
-      alert("Please enter a number from 1 to 5.");
-    }
-  }}
->
-  📖 &nbsp; Find a Verse
-</button>
-
-          </div>
-        </section>
-
-
-        {/* TODAY'S HOPE */}
-        <section className="todays-hope">
-          <div className="music-symbol">♫</div>
-
-          <h3>Today's Hope</h3>
-
-          <blockquote>
-            "Come to me, all you who are weary
-            and burdened,
-            <br />
-            and I will give you rest."
-          </blockquote>
-
-          <p className="verse">Matthew 11:28</p>
-        </section>
-
-
-        {/* DAILY HOPE */}
-        <section className="daily-hope">
-          <div className="section-label">
-            DAILY HOPE
-          </div>
-
-          <h2>A little hope for today.</h2>
-
-          <div className="star">✦</div>
-
-          <p className="daily-verse">
-            "Those who hope in the Lord will renew their strength."
-          </p>
-
-          <p className="daily-reference">
-            Isaiah 40:31
-          </p>
-        </section>
-
-
-        {/* YOUR MUSIC */}
-        <section id="songs" className="music-section">
-
-          <div className="music-intro">
-            <div className="section-label">
-              YOUR MUSIC
+            <div className="hero-badge">
+              <span>♡</span>
+              Music • Prayer • Hope
             </div>
 
-            <h2>Songs that carry hope.</h2>
+            <h1>
+              Find Hope.
+              <br />
+              <span>Find Your Song.</span>
+            </h1>
 
-            <button className="view-all">
-              View all →
-            </button>
+            <p className="hero-text">
+              HopeSong.ai membantu kamu menemukan lagu rohani,
+              doa, dan ayat Alkitab yang relevan dengan keadaan
+              hati dan kebutuhan spiritualmu.
+            </p>
+
+            <div className="hero-buttons">
+              <a href="#songs" className="primary-button">
+                Explore Songs
+              </a>
+
+              <a href="#bible" className="secondary-button">
+                Find Bible Verse
+              </a>
+            </div>
+
           </div>
 
+          <div className="hero-card">
 
-          <div className="song-list">
-            {songs.map((song, index) => (
-              <div className="song-card" key={index}>
+            <div className="hero-card-icon">
+              ♡
+            </div>
 
-                <div className="song-icon">
-                  {song.icon}
-                </div>
+            <p className="hero-card-label">
+              TODAY'S HOPE
+            </p>
 
-                <div className="song-info">
-                  <h3>{song.title}</h3>
-                  <p>{song.artist}</p>
-                </div>
+            <h3>
+              "Semoga Allah, sumber pengharapan,
+              memenuhi kamu dengan segala sukacita
+              dan damai sejahtera."
+            </h3>
 
+            <span>
+              Roma 15:13
+            </span>
+
+          </div>
+        </section>
+
+        {/* ====================================================
+            SONGS
+        ==================================================== */}
+
+        <section id="songs" className="section songs-section">
+
+          <div className="section-heading">
+            <div>
+              <span className="section-label">
+                MUSIC FOR YOUR SOUL
+              </span>
+
+              <h2>
+                Songs that meet you where you are.
+              </h2>
+            </div>
+
+            <p>
+              Temukan lagu yang sesuai dengan suasana hati,
+              iman, dan perjalanan spiritualmu.
+            </p>
+          </div>
+
+          {/* Search */}
+
+          <div className="song-controls">
+
+            <div className="search-box">
+              <span>⌕</span>
+
+              <input
+                type="text"
+                placeholder="Search songs..."
+                value={search}
+                onChange={(event) =>
+                  setSearch(event.target.value)
+                }
+              />
+            </div>
+
+            <div className="category-buttons">
+              {categories.map((category) => (
                 <button
-                  className="play-button"
-                  onClick={() => 
-                  setPlayingSong(song.title)}
-                  aria-label={`Play $
-                  {song.title}`}
+                  key={category}
+                  type="button"
+                  className={
+                    selectedCategory === category
+                      ? "category-button active"
+                      : "category-button"
+                  }
+                  onClick={() =>
+                    setSelectedCategory(category)
+                  }
                 >
-                  ▶️
+                  {category}
                 </button>
-
-              </div>
-            ))}
-          </div>
-          
-          {playingSong && (
-           <div 
-          className="now-playing">
-             🎵 Now Playing:
-          {playingSong}
+              ))}
             </div>
-           )}
+
+          </div>
+
+          {/* Song Grid */}
+
+          <div className="song-grid">
+
+            {filteredSongs.length > 0 ? (
+              filteredSongs.map((song) => (
+                <article
+                  className={
+                    playingSong === song.id
+                      ? "song-card playing"
+                      : "song-card"
+                  }
+                  key={song.id}
+                >
+
+                  <div className="song-cover">
+                    <span>
+                      {getCategoryIcon(song.category)}
+                    </span>
+                  </div>
+
+                  <div className="song-info">
+
+                    <span className="song-category">
+                      {song.category}
+                    </span>
+
+                    <h3>
+                      {song.title}
+                    </h3>
+
+                    <p className="song-artist">
+                      {song.artist}
+                    </p>
+
+                    <p className="song-description">
+                      {song.description}
+                    </p>
+
+                    <button
+                      type="button"
+                      className="play-button"
+                      onClick={() =>
+                        setPlayingSong(
+                          playingSong === song.id
+                            ? null
+                            : song.id
+                        )
+                      }
+                    >
+                      {playingSong === song.id
+                        ? "❚❚ Playing"
+                        : "▶️ Play"}
+                    </button>
+
+                  </div>
+
+                </article>
+              ))
+            ) : (
+              <div className="empty-state">
+                <div>♡</div>
+
+                <h3>
+                  Song tidak ditemukan
+                </h3>
+
+                <p>
+                  Coba gunakan kata pencarian lain.
+                </p>
+              </div>
+            )}
+
+          </div>
 
         </section>
 
+        {/* ====================================================
+            PRAYER
+        ==================================================== */}
 
-        {/* MOMENT WITH GOD */}
-        <section id="prayer" className="moment">
+        <section id="prayer" className="section prayer-section">
 
-          <div className="section-label">
-            A MOMENT WITH GOD
+          <div className="prayer-container">
+
+            <div className="prayer-intro">
+
+              <span className="section-label">
+                TALK TO GOD
+              </span>
+
+              <h2>
+                You don't have to carry it alone.
+              </h2>
+
+              <p>
+                Tuliskan isi hatimu. Gunakan ruang ini
+                sebagai pengingat untuk berhenti sejenak,
+                berdoa, dan menyerahkan semuanya kepada Tuhan.
+              </p>
+
+              <div className="prayer-quote">
+                <span>“</span>
+
+                <p>
+                  Serahkanlah segala kekuatiranmu kepada-Nya,
+                  sebab Ia yang memelihara kamu.
+                </p>
+
+                <small>
+                  1 Petrus 5:7
+                </small>
+              </div>
+
+            </div>
+
+            <div className="prayer-card">
+
+              {!prayerSubmitted ? (
+                <form onSubmit={handlePrayerSubmit}>
+
+                  <label htmlFor="prayer">
+                    What is on your heart?
+                  </label>
+
+                  <textarea
+                    id="prayer"
+                    value={prayer}
+                    onChange={(event) =>
+                      setPrayer(event.target.value)
+                    }
+                    placeholder="Tuliskan doamu di sini..."
+                    rows="7"
+                  />
+
+                  <button
+                    type="submit"
+                    className="primary-button full"
+                  >
+                    Send Prayer ♡
+                  </button>
+
+                </form>
+              ) : (
+                <div className="prayer-success">
+
+                  <div className="success-icon">
+                    ♡
+                  </div>
+
+                  <h3>
+                    Your prayer is heard.
+                  </h3>
+
+                  <p>
+                    Semoga Tuhan memberikan damai,
+                    kekuatan, dan pengharapan dalam
+                    setiap langkahmu.
+                  </p>
+
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={() => {
+                      setPrayer("");
+                      setPrayerSubmitted(false);
+                    }}
+                  >
+                    Write Another Prayer
+                  </button>
+
+                </div>
+              )}
+
+            </div>
+
           </div>
 
-          <h2>
-            You don't have to
-            <br />
-            carry it alone.
-          </h2>
+        </section>
 
-          <p>
-            Tell HopeSong what is in your heart. Turn your thoughts
-            into a prayer, a song, or simply a moment of peace.
-          </p>
+        {/* ====================================================
+            BIBLE
+        ==================================================== */}
 
-          <button className="prayer-button">
-            Start a Prayer →
-          </button>
+        <section id="bible" className="section bible-section">
 
-          <div className="hashtags">
-            🙏
-            <br />
-            HopeFaithPeace
+          <div className="section-heading centered">
+
+            <span className="section-label">
+              WORD OF GOD
+            </span>
+
+            <h2>
+              A verse for your heart.
+            </h2>
+
+            <p>
+              Ayat Alkitab yang dapat menjadi pengingat
+              ketika kamu membutuhkan harapan, keberanian,
+              dan damai.
+            </p>
+
+          </div>
+
+          <div className="verse-grid">
+
+            {bibleVerses.map((verse) => (
+              <article
+                className="verse-card"
+                key={verse.reference}
+              >
+
+                <span className="verse-category">
+                  {verse.category}
+                </span>
+
+                <div className="verse-mark">
+                  “
+                </div>
+
+                <p>
+                  {verse.text}
+                </p>
+
+                <strong>
+                  {verse.reference}
+                </strong>
+
+              </article>
+            ))}
+
+          </div>
+
+        </section>
+
+        {/* ====================================================
+            WEBMCP EXPLANATION
+        ==================================================== */}
+
+        <section className="webmcp-section">
+
+          <div className="webmcp-content">
+
+            <div className="webmcp-icon">
+              ✦
+            </div>
+
+            <div>
+
+              <span className="section-label">
+                AI READY
+              </span>
+
+              <h2>
+                HopeSong.ai works with AI agents.
+              </h2>
+
+              <p>
+                Dengan WebMCP, AI agent dapat meminta
+                HopeSong.ai menemukan ayat Alkitab yang
+                relevan berdasarkan topik atau kebutuhan
+                spiritual pengguna.
+              </p>
+
+            </div>
+
+            <div className="webmcp-tool">
+
+              <span>
+                AVAILABLE TOOL
+              </span>
+
+              <code>
+                findBibleVerse
+              </code>
+
+              <small>
+                topic + language
+              </small>
+
+            </div>
+
           </div>
 
         </section>
 
       </main>
 
+      {/* ======================================================
+          FOOTER
+      ====================================================== */}
 
-      {/* FOOTER */}
-      <footer>
+      <footer className="footer">
 
         <div className="footer-logo">
           <span className="heart">♡</span>
-          <strong>HopeSong.ai</strong>
+          HopeSong.ai
         </div>
 
-        <div className="footer-text">
-          Bringing hearts closer to His Love, Hope & Peace.
+        <p>
+          Music, prayer, and hope for every season.
+        </p>
+
+        <div className="footer-links">
+          <a href="#home">Home</a>
+          <a href="#songs">Songs</a>
+          <a href="#prayer">Prayer</a>
+          <a href="#bible">Bible</a>
         </div>
 
         <div className="copyright">
