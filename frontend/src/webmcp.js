@@ -253,7 +253,219 @@ showWebMCPStatus(
         return verse;
       }
     });
+    // --------------------------------------------------------
+    // WebMCP Tool 2: findHopeJourney
+    // --------------------------------------------------------
+    await modelContext.registerTool({
+      name: "findHopeJourney",
 
+      title: "Find a Hope Journey",
+
+      description:
+        "Create a short HopeSong.ai journey based on the user's emotional or spiritual need. The journey includes Scripture, reflection, prayer, a simple next step, and a message of hope.",
+
+      inputSchema: {
+        type: "object",
+
+        properties: {
+          topic: {
+            type: "string",
+            description:
+              "The user's emotion or spiritual need, such as fear, anxiety, stress, peace, tiredness, uncertainty, hope, or encouragement."
+          },
+
+          language: {
+            type: "string",
+
+            enum: [
+              "Bahasa Indonesia",
+              "English"
+            ],
+
+            description:
+              "The language in which the Hope Journey should be returned. Use exactly Bahasa Indonesia or English."
+          }
+        },
+
+        required: ["topic", "language"]
+      },
+
+      annotations: {
+        readOnlyHint: true
+      },
+
+      execute: async ({ topic, language }) => {
+        const text = String(topic || "").toLowerCase();
+
+        let category = "hope";
+
+        // FEAR / ANXIETY / UNCERTAINTY
+        if (
+          text.includes("fear") ||
+          text.includes("afraid") ||
+          text.includes("scared") ||
+          text.includes("anxious") ||
+          text.includes("anxiety") ||
+          text.includes("worried") ||
+          text.includes("worry") ||
+          text.includes("stress") ||
+          text.includes("uncertain") ||
+          text.includes("uncertainty") ||
+          text.includes("takut") ||
+          text.includes("cemas") ||
+          text.includes("khawatir") ||
+          text.includes("gelisah") ||
+          text.includes("stres") ||
+          text.includes("tidak pasti")
+        ) {
+          category = "fear";
+        }
+
+        // PEACE / REST / TIREDNESS
+        else if (
+          text.includes("peace") ||
+          text.includes("calm") ||
+          text.includes("rest") ||
+          text.includes("tired") ||
+          text.includes("weary") ||
+          text.includes("exhausted") ||
+          text.includes("overwhelmed") ||
+          text.includes("damai") ||
+          text.includes("tenang") ||
+          text.includes("istirahat") ||
+          text.includes("lelah") ||
+          text.includes("letih") ||
+          text.includes("terbeban")
+        ) {
+          category = "peace";
+        }
+
+        // HOPE / ENCOURAGEMENT
+        else if (
+          text.includes("hope") ||
+          text.includes("encourage") ||
+          text.includes("encouragement") ||
+          text.includes("harapan") ||
+          text.includes("pengharapan") ||
+          text.includes("semangat")
+        ) {
+          category = "hope";
+        }
+
+        const journeys = {
+          "Bahasa Indonesia": {
+            fear: {
+              reflection:
+                "Ketika masa depan terasa tidak pasti, kita tidak harus memiliki semua jawabannya hari ini. Kita dapat membawa ketakutan kita kepada Tuhan dan mengambil satu langkah dalam iman.",
+              prayer:
+                "Tuhan, aku menyerahkan ketakutan dan kekhawatiranku kepada-Mu. Teguhkan hatiku dan tuntun aku untuk kembali percaya kepada penyertaan-Mu.",
+              nextStep:
+                "Berhenti sejenak. Baca ayat ini perlahan, lalu serahkan satu kekhawatiran yang paling membebani hatimu kepada Tuhan.",
+              hope:
+                "Kamu tidak berjalan menghadapi hari esok sendirian."
+            },
+
+            peace: {
+              reflection:
+                "Kelelahan tidak selalu berarti kita harus berusaha lebih keras. Terkadang kita membutuhkan ruang untuk berhenti, menerima damai Tuhan, dan membiarkan hati kita beristirahat di dalam-Nya.",
+              prayer:
+                "Tuhan, tenangkan hati dan pikiranku. Tolong aku melepaskan beban yang tidak sanggup kukendalikan dan menerima damai sejahtera-Mu.",
+              nextStep:
+                "Ambil satu menit tanpa gangguan. Tarik napas perlahan dan renungkan ayat ini sebelum melanjutkan aktivitasmu.",
+              hope:
+                "Di tengah kelelahanmu, masih ada tempat untuk beristirahat dan menemukan damai."
+            },
+
+            hope: {
+              reflection:
+                "Harapan tidak berarti semua keadaan langsung berubah. Harapan mengingatkan kita bahwa cerita kita belum selesai dan Tuhan masih bekerja.",
+              prayer:
+                "Tuhan, pulihkan pengharapanku. Tolong aku melihat kembali kebaikan-Mu dan percaya bahwa Engkau masih bekerja dalam hidupku.",
+              nextStep:
+                "Tuliskan satu hal kecil yang masih dapat kamu syukuri hari ini dan jadikan itu pengingat bahwa masih ada harapan.",
+              hope:
+                "Hari ini mungkin belum menjadi akhir dari pergumulanmu, tetapi ini juga bukan akhir dari harapanmu."
+            }
+          },
+
+          English: {
+            fear: {
+              reflection:
+                "When the future feels uncertain, you do not need to have every answer today. You can bring your fear to God and take one faithful step at a time.",
+              prayer:
+                "Lord, I give You my fear and the things I cannot control. Strengthen my heart and help me trust Your presence again.",
+              nextStep:
+                "Take a quiet moment. Read this verse slowly and bring one specific worry to God.",
+              hope:
+                "You are not walking into tomorrow alone."
+            },
+
+            peace: {
+              reflection:
+                "Weariness does not always mean you need to try harder. Sometimes you need space to stop, receive God's peace, and allow your heart to rest.",
+              prayer:
+                "Lord, quiet my heart and mind. Help me release what I cannot control and receive Your peace.",
+              nextStep:
+                "Take one uninterrupted minute. Slow down and reflect on this verse before continuing your day.",
+              hope:
+                "Even in your weariness, there is still a place to rest and find peace."
+            },
+
+            hope: {
+              reflection:
+                "Hope does not mean every circumstance changes immediately. Hope reminds us that our story is not finished and God is still at work.",
+              prayer:
+                "Lord, renew my hope. Help me see Your goodness again and trust that You are still working in my life.",
+              nextStep:
+                "Write down one small thing you can still be thankful for today and let it remind you that hope remains.",
+              hope:
+                "This may not be the end of your struggle, but it is not the end of your hope."
+            }
+          }
+        };
+
+        const languageJourney = journeys[language];
+
+        if (!languageJourney) {
+          return (
+            `HopeSong.ai does not currently have Hope Journey data for "${language}". ` +
+            `Available languages: Bahasa Indonesia and English.`
+          );
+        }
+
+        const journey = languageJourney[category];
+        const languageVerses = verses[language];
+        const verse = languageVerses?.[category];
+
+        if (!journey || !verse) {
+          return `HopeSong.ai could not create a Hope Journey for "${topic}".`;
+        }
+
+        if (language === "Bahasa Indonesia") {
+          return (
+            `HOPE JOURNEY — ${category.toUpperCase()}\n\n` +
+            `📖 FIRMAN\n${verse}\n\n` +
+            `💭 REFLEKSI\n${journey.reflection}\n\n` +
+            `🙏 DOA\n${journey.prayer}\n\n` +
+            `🌱 LANGKAH KECIL\n${journey.nextStep}\n\n` +
+            `🤍 HARAPAN\n${journey.hope}`
+          );
+        }
+
+        return (
+          `HOPE JOURNEY — ${category.toUpperCase()}\n\n` +
+          `📖 SCRIPTURE\n${verse}\n\n` +
+          `💭 REFLECTION\n${journey.reflection}\n\n` +
+          `🙏 PRAYER\n${journey.prayer}\n\n` +
+          `🌱 NEXT STEP\n${journey.nextStep}\n\n` +
+          `🤍 HOPE\n${journey.hope}`
+        );
+      }
+    });
+
+    console.log(
+      "HopeSong.ai WebMCP tool berhasil didaftarkan: findHopeJourney"
+    );
     console.log(
       "HopeSong.ai WebMCP tool berhasil didaftarkan: findBibleVerse"
     );
