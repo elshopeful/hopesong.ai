@@ -8,27 +8,7 @@ export async function registerHopeSongTools() {
   // 1. Ambil WebMCP ModelContext
   // ----------------------------------------------------------
   const showWebMCPStatus = (message, type = "info") => {
-    let el = document.getElementById("webmcp-debug");
-
-    if (!el) {
-      el = document.createElement("div");
-      el.id = "webmcp-debug";
-
-      el.style.cssText = `
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        z-index: 99999;
-        padding: 14px 18px;
-        border-radius: 12px;
-        font-family: sans-serif;
-        font-size: 14px;
-      `;
-
-      document.body.appendChild(el);
-    }
-
-    el.textContent = message;
+    console.log(`[WebMCP ${type}]`, message);
   };
 
   const modelContext = document.modelContext;
